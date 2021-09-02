@@ -27,6 +27,14 @@ const getProducts = (searchResponse) => {
 };
 
 const processSingleProduct = (product) => {
+	const attributeCondition = product.attributes.find(
+		(attr) => attr.id === "ITEM_CONDITION"
+	);
+
+	const condition = attributeCondition
+		? attributeCondition.values[0].name
+		: product.condition;
+
 	return {
 		id: product.id,
 		title: product.title,
@@ -35,10 +43,10 @@ const processSingleProduct = (product) => {
 			amount: product.price,
 			decimals: 0,
 		},
-		picture: product.thumbnail,
-		condition: product.condition,
+		picture: product.pictures ? product.pictures[0].url : product.thumbnail,
+		condition,
 		free_shiping: product.shipping.free_shipping,
-		city: product.address.city_name,
+		city: product.address ? product.address.city_name : "",
 	};
 };
 
@@ -68,7 +76,7 @@ const getItems = async (req, res) => {
 	} catch (e) {
 		console.log(e);
 		return res.status(500).json({
-			message: e,
+			error: true,
 		});
 	}
 };
@@ -78,7 +86,31 @@ const getItems = async (req, res) => {
  * @param {Express.Request} req
  * @param {Express.Response} res
  */
-const getItem = (req, res) => {};
+const getItem = async (req, res) => {
+	try {
+		const id = req.params.id;
+
+		const productRes = await axios.get(`${urls.items}/${id}`);
+		const descriptionRes = await axios.get(`${urls.items}/${id}/description`);
+
+		const productData = productRes.data;
+		const descriptionData = descriptionRes.data;
+
+		const finalProd = {
+			...processSingleProduct(productData),
+			sold_quantity: productData.sold_quantity,
+			description: descriptionData.plain_text,
+		};
+
+		return res.status(200).json({
+			item: finalProd,
+		});
+	} catch (e) {
+		return res.status(500).json({
+			error: true,
+		});
+	}
+};
 
 module.exports = {
 	getItems,
