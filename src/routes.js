@@ -27,7 +27,6 @@ const getItems = async (req, res) => {
 		const products = getProducts(data);
 
 		return res.status(200).json({
-			author: {},
 			categories: categoryNames,
 			items: products,
 		});

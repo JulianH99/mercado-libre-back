@@ -1,4 +1,6 @@
 module.exports.getCategoryNames = (searchResponse) => {
+	// get filters from response object to extract the category
+	// filter
 	const availableFilters = searchResponse.filters;
 	if (!availableFilters) {
 		return [];
@@ -8,6 +10,8 @@ module.exports.getCategoryNames = (searchResponse) => {
 		(filter) => filter.id === "category"
 	);
 
+	// get only the path from root, which contains the actual categories
+	// to paint the breadcrumb
 	const pathFromRoot = categoriesFilter.values[0].path_from_root;
 
 	const categoryNames = pathFromRoot.map((path) => path.name);
@@ -24,6 +28,7 @@ module.exports.getProducts = (searchResponse) => {
 };
 
 module.exports.processSingleProduct = (product) => {
+	// find condition attribute inside the product object
 	const attributeCondition = product.attributes.find(
 		(attr) => attr.id === "ITEM_CONDITION"
 	);
@@ -38,8 +43,8 @@ module.exports.processSingleProduct = (product) => {
 		price: {
 			currency: product.currency_id,
 			amount: product.price,
-			decimals: 0,
 		},
+		// get the bigger picture if available, otherwise get the small thumbnail
 		picture: product.pictures ? product.pictures[0].url : product.thumbnail,
 		condition,
 		free_shiping: product.shipping.free_shipping,
